@@ -1,4 +1,6 @@
 class Product:
+    """Represents a product with name, price and quantity."""
+
     def __init__(self, name: str, price: float, quantity: int) -> None:
         if not name.strip():
             raise ValueError("name can not be empty")
@@ -47,6 +49,7 @@ class Product:
         print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}")
 
     def buy(self, quantity: int) -> float:
+        """Buy a quantity of this product and return total price."""
         if not isinstance(quantity, int):
             raise ValueError("Quantity must be a whole number")
         if quantity <= 0:

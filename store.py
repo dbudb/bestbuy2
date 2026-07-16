@@ -3,6 +3,7 @@ from products import Product
 
 
 class Store:
+    """Represents a store that manages products."""
     def __init__(self, products: List[Product]):
         self.products = products
 

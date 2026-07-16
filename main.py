@@ -1,5 +1,5 @@
 def start(store_obj):
-
+    """starts"""
     def list_products():
         print("------")
         for index, product in enumerate(store_obj.get_all_products(), start=1):
