@@ -1,27 +1,75 @@
-from products import Product
-from store import Store
+def start(store_obj):
 
-bose = Product("Bose QuietComfort Earbuds", price=250, quantity=500)
-mac = Product("MacBook Air M2", price=1450, quantity=100)
+    def list_products():
+        print("------")
+        for index, product in enumerate(store_obj.get_all_products(), start=1):
+            print(f"{index}. ", end="")
+            product.show()
+        print("------")
 
-print(bose.buy(50))
-print(mac.buy(100))
-print(mac.is_active())
+    def show_total():
+        print(f"Total of {store_obj.get_total_quantity()} items in store")
 
-bose.show()
-mac.show()
+    def make_order():
+        shopping_list = []
 
-bose.set_quantity(1000)
-bose.show()
+        while True:
+            list_products()
 
+            print("When you want to finish order, enter empty text.")
 
-product_list = [Product("MacBook Air M2", price=1450, quantity=100),
-                Product("Bose QuietComfort Earbuds", price=250, quantity=500),
-                Product("Google Pixel 7", price=500, quantity=250),
-               ]
+            product_choice = input("Which product # do you want? ")
 
-best_buy = Store(product_list)
-products = best_buy.get_all_products()
-print(best_buy.get_total_quantity())
-print(best_buy.order([(products[0], 1), (products[1], 2)]))
-# Put it in your main function in the same file, and make sure you are handling the importing in the right manner.
+            if product_choice == "":
+                break
+
+            quantity = input("What amount do you want? ")
+
+            if quantity == "":
+                break
+
+            try:
+                product = store_obj.get_all_products()[int(product_choice) - 1]
+                quantity = int(quantity)
+
+                shopping_list.append((product, quantity))
+                print("Product added to list!")
+
+            except (ValueError, IndexError):
+                print("Invalid input")
+
+        if shopping_list:
+            try:
+                total = store_obj.order(shopping_list)
+                print("********")
+                print(f"Order made! Total payment: ${total}")
+            except ValueError as e:
+                print(e)
+
+    actions = {
+        "1": list_products,
+        "2": show_total,
+        "3": make_order,
+    }
+
+    while True:
+        print(
+            "\n   Store Menu\n"
+            "   ----------\n"
+            "1. List all products in store\n"
+            "2. Show total amount in store\n"
+            "3. Make an order\n"
+            "4. Quit"
+        )
+
+        choice = input("Please choose a number: ")
+
+        if choice == "4":
+            break
+
+        action = actions.get(choice)
+
+        if action:
+            action()
+        else:
+            print("Invalid choice")
