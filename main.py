@@ -1,56 +1,76 @@
+"""Command-line interface for the Best Buy store."""
+
 import products
 import store
 
 
+def list_products(store_obj):
+    """Display all active products in the store."""
+    print("------")
+
+    for index, product in enumerate(
+        store_obj.get_all_products(),
+        start=1,
+    ):
+        print(f"{index}. ", end="")
+        product.show()
+
+    print("------")
+
+
+def show_total(store_obj):
+    """Display the total number of items in the store."""
+    total_quantity = store_obj.get_total_quantity()
+    print(f"Total of {total_quantity} items in store")
+
+
+def make_order(store_obj):
+    """Ask the user for products and submit an order."""
+    shopping_list = []
+
+    while True:
+        list_products(store_obj)
+        print("When you want to finish the order, enter empty text.")
+
+        product_choice = input("Which product # do you want? ")
+
+        if not product_choice:
+            break
+
+        quantity_input = input("What amount do you want? ")
+
+        if not quantity_input:
+            break
+
+        try:
+            product_number = int(product_choice)
+            quantity = int(quantity_input)
+
+            if product_number < 1:
+                raise ValueError
+
+            available_products = store_obj.get_all_products()
+            product = available_products[product_number - 1]
+
+            shopping_list.append((product, quantity))
+            print("Product added to list!")
+
+        except (ValueError, IndexError):
+            print("Invalid input")
+
+    if not shopping_list:
+        return
+
+    try:
+        total = store_obj.order(shopping_list)
+        print("********")
+        print(f"Order made! Total payment: ${total}")
+    except ValueError as error:
+        print(error)
+
+
 def start(store_obj):
-    """starts"""
-
-    def list_products():
-        print("------")
-        for index, product in enumerate(store_obj.get_all_products(), start=1):
-            print(f"{index}. ", end="")
-            product.show()
-        print("------")
-
-    def show_total():
-        print(f"Total of {store_obj.get_total_quantity()} items in store")
-
-    def make_order():
-        shopping_list = []
-
-        while True:
-            list_products()
-
-            print("When you want to finish order, enter empty text.")
-
-            product_choice = input("Which product # do you want? ")
-
-            if product_choice == "":
-                break
-
-            quantity = input("What amount do you want? ")
-
-            if quantity == "":
-                break
-
-            try:
-                product = store_obj.get_all_products()[int(product_choice) - 1]
-                quantity = int(quantity)
-
-                shopping_list.append((product, quantity))
-                print("Product added to list!")
-
-            except (ValueError, IndexError):
-                print("Invalid input")
-
-        if shopping_list:
-            try:
-                total = store_obj.order(shopping_list)
-                print("********")
-                print(f"Order made! Total payment: ${total}")
-            except ValueError as e:
-                print(e)
-
+    """Run the interactive store menu."""
     actions = {
         "1": list_products,
         "2": show_total,
@@ -59,8 +79,8 @@ def start(store_obj):
 
     while True:
         print(
-            "\n   Store Menu\n"
-            "   ----------\n"
+            "\nStore Menu\n"
+            "----------\n"
             "1. List all products in store\n"
             "2. Show total amount in store\n"
             "3. Make an order\n"
@@ -74,16 +94,21 @@ def start(store_obj):
 
         action = actions.get(choice)
 
-        if action:
-            action()
-        else:
+        if action is None:
             print("Invalid choice")
+        else:
+            action(store_obj)
 
 
 def main():
+    """Create the default store and start the interface."""
     product_list = [
         products.Product("MacBook Air M2", 1450, 100),
-        products.Product("Bose QuietComfort Earbuds", 250, 500),
+        products.Product(
+            "Bose QuietComfort Earbuds",
+            250,
+            500,
+        ),
         products.Product("Google Pixel 7", 500, 250),
     ]
 
