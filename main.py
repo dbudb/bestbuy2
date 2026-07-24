@@ -1,5 +1,10 @@
+import products
+import store
+
+
 def start(store_obj):
     """starts"""
+
     def list_products():
         print("------")
         for index, product in enumerate(store_obj.get_all_products(), start=1):
@@ -73,3 +78,18 @@ def start(store_obj):
             action()
         else:
             print("Invalid choice")
+
+
+def main():
+    product_list = [
+        products.Product("MacBook Air M2", 1450, 100),
+        products.Product("Bose QuietComfort Earbuds", 250, 500),
+        products.Product("Google Pixel 7", 500, 250),
+    ]
+
+    best_buy = store.Store(product_list)
+    start(best_buy)
+
+
+if __name__ == "__main__":
+    main()
