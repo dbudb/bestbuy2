@@ -110,6 +110,8 @@ def main():
             500,
         ),
         products.Product("Google Pixel 7", 500, 250),
+        products.NonStockedProduct("Windows License", 125),
+        products.LimitedProduct("Shipping", 10, 250, 1),
     ]
 
     best_buy = store.Store(product_list)
