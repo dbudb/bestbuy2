@@ -50,6 +50,9 @@ class Product:
 
     def buy(self, quantity: int) -> float:
         """Buy a quantity of this product and return total price."""
+        if not self.is_active():
+            raise ValueError("Product is not active")
+
         if not isinstance(quantity, int):
             raise ValueError("Quantity must be a whole number")
         if quantity <= 0:
