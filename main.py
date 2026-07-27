@@ -10,11 +10,10 @@ def list_products(store_obj):
     print("------")
 
     for index, product in enumerate(
-        store_obj.get_all_products(),
-        start=1,
+            store_obj.get_all_products(),
+            start=1,
     ):
-        print(f"{index}. ", end="")
-        product.show()
+        print(f"{index}. {product}")
 
     print("------")
 
@@ -119,9 +118,9 @@ def main():
     third_one_free = promotions.ThirdOneFree("Third One Free!")
     thirty_percent = promotions.PercentDiscount("30% off!", percent=30)
 
-    product_list[0].set_promotion(second_half_price)
-    product_list[1].set_promotion(third_one_free)
-    product_list[3].set_promotion(thirty_percent)
+    product_list[0].promotion = second_half_price
+    product_list[1].promotion = third_one_free
+    product_list[3].promotion = thirty_percent
 
     best_buy = store.Store(product_list)
     start(best_buy)

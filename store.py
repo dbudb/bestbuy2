@@ -19,7 +19,7 @@ class Store:
     def get_total_quantity(self) -> int:
         """Returns how many items are in the store in total."""
         return sum(
-            product.get_quantity()
+            product.quantity
             for product in self.products
             if product.is_active()
         )
@@ -27,6 +27,15 @@ class Store:
     def get_all_products(self) -> List[Product]:
         """Returns all products in the store that are active."""
         return [product for product in self.products if product.is_active()]
+
+    def __contains__(self, product: Product) -> bool:
+        return product in self.products
+
+    def __add__(self, other):
+        if not isinstance(other, Store):
+            return NotImplemented
+
+        return Store(self.products + other.products)
 
     def order(self, shopping_list) -> float:
         """Gets a list of tuples, where each tuple has 2 items:

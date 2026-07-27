@@ -8,37 +8,42 @@ class Product:
         if not name.strip():
             raise ValueError("name can not be empty")
         self.name = name.strip()
-        try:
-            price = float(price)
-        except (TypeError, ValueError) as e:
-            raise ValueError(f"Price must be a number.")
-        if price >= 0:
-            self.price = price
-        else:
-            raise ValueError("price can not be negative")
-        if not isinstance(quantity, int):
-            raise ValueError("Quantity must be a whole number")
+
+        self.price = price
         self.promotion = None
         self.activate()
-        self.set_quantity(quantity)
+        self.quantity = quantity
 
-    def get_quantity(self) -> int:
-        return self.quantity
+    @property
+    def price(self) -> float:
+        return self._price
 
-    def set_quantity(self, quantity: int):
+    @price.setter
+    def price(self, price: float) -> None:
+        try:
+            price = float(price)
+        except (TypeError, ValueError):
+            raise ValueError("Price must be a number")
+
+        if price < 0:
+            raise ValueError("price can not be negative")
+
+        self._price = price
+
+    @property
+    def quantity(self) -> int:
+        return self._quantity
+
+    @quantity.setter
+    def quantity(self, quantity: int) -> None:
         if not isinstance(quantity, int):
-            raise ValueError("quantity must be a whole number (integer).")
+            raise ValueError("quantity must be a whole number (integer)")
+        if quantity < 0:
+            raise ValueError("quantity must be >= 0")
 
-        else:
-            quantity = int(quantity)
-
-            if quantity < 0:
-                raise ValueError("quantity must be >= 0")
-            elif quantity == 0:
-                self.quantity = 0
-                self.deactivate()
-            else:
-                self.quantity = quantity
+        self._quantity = quantity
+        if quantity == 0:
+            self.deactivate()
 
     def is_active(self) -> bool:
         return self.active
@@ -49,14 +54,16 @@ class Product:
     def deactivate(self):
         self.active = False
 
-    def get_promotion(self) -> Promotion | None:
-        return self.promotion
+    @property
+    def promotion(self) -> Promotion | None:
+        return self._promotion
 
-    def set_promotion(self, promotion: Promotion | None) -> None:
+    @promotion.setter
+    def promotion(self, promotion: Promotion | None) -> None:
         if promotion is not None and not isinstance(promotion, Promotion):
             raise TypeError("Promotion must be a Promotion instance or None")
 
-        self.promotion = promotion
+        self._promotion = promotion
 
     def _promotion_description(self) -> str:
         if self.promotion is None:
@@ -64,11 +71,23 @@ class Product:
 
         return f", Promotion: {self.promotion.name}"
 
-    def show(self):
-        print(
-            f"{self.name}, Price: {self.price}, Quantity: {self.quantity}"
+    def __str__(self) -> str:
+        return (
+            f"{self.name}, Price: ${self.price:g} Quantity:{self.quantity}"
             f"{self._promotion_description()}"
         )
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, Product):
+            return NotImplemented
+
+        return self.price < other.price
+
+    def __gt__(self, other) -> bool:
+        if not isinstance(other, Product):
+            return NotImplemented
+
+        return self.price > other.price
 
     def _validate_purchase_quantity(self, quantity: int) -> None:
         """Validate a requested purchase quantity."""
@@ -91,11 +110,11 @@ class Product:
         """Buy a quantity of this product and return total price."""
         self._validate_purchase_quantity(quantity)
 
-        if quantity > self.get_quantity():
+        if quantity > self.quantity:
             raise ValueError("Not enough stock")
 
         total_price = self._calculate_price(quantity)
-        self.set_quantity(self.get_quantity() - quantity)
+        self.quantity -= quantity
 
         return total_price
 
@@ -106,13 +125,14 @@ class NonStockedProduct(Product):
     def __init__(self, name: str, price: float) -> None:
         super().__init__(name, price, 0)
 
-    def set_quantity(self, quantity: int) -> None:
+    @Product.quantity.setter
+    def quantity(self, quantity: int) -> None:
         """Keep the quantity at zero because this product is not stocked."""
-        self.quantity = 0
+        self._quantity = 0
 
-    def show(self) -> None:
-        print(
-            f"{self.name}, Price: {self.price}, Quantity: Unlimited"
+    def __str__(self) -> str:
+        return (
+            f"{self.name}, Price: ${self.price:g} Quantity:Unlimited"
             f"{self._promotion_description()}"
         )
 
@@ -126,11 +146,11 @@ class LimitedProduct(Product):
     """Represents a product with a per-order purchase limit."""
 
     def __init__(
-        self,
-        name: str,
-        price: float,
-        quantity: int,
-        maximum: int,
+            self,
+            name: str,
+            price: float,
+            quantity: int,
+            maximum: int,
     ) -> None:
         if not isinstance(maximum, int) or maximum <= 0:
             raise ValueError("Maximum must be a positive whole number")
@@ -138,9 +158,9 @@ class LimitedProduct(Product):
         super().__init__(name, price, quantity)
         self.maximum = maximum
 
-    def show(self) -> None:
-        print(
-            f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, "
+    def __str__(self) -> str:
+        return (
+            f"{self.name}, Price: ${self.price:g} Quantity:{self.quantity}, "
             f"Limited to {self.maximum} per order"
             f"{self._promotion_description()}"
         )
