@@ -48,8 +48,8 @@ class Product:
     def show(self):
         print(f"{self.name}, Price: {self.price}, Quantity: {self.quantity}")
 
-    def buy(self, quantity: int) -> float:
-        """Buy a quantity of this product and return total price."""
+    def _validate_purchase_quantity(self, quantity: int) -> None:
+        """Validate a requested purchase quantity."""
         if not self.is_active():
             raise ValueError("Product is not active")
 
@@ -58,9 +58,66 @@ class Product:
         if quantity <= 0:
             raise ValueError("Quantity must be positive")
 
+    def buy(self, quantity: int) -> float:
+        """Buy a quantity of this product and return total price."""
+        self._validate_purchase_quantity(quantity)
+
         if quantity > self.get_quantity():
             raise ValueError("Not enough stock")
 
         self.set_quantity(self.get_quantity() - quantity)
 
         return quantity * self.price
+
+
+class NonStockedProduct(Product):
+    """Represents a product whose stock quantity is not tracked."""
+
+    def __init__(self, name: str, price: float) -> None:
+        super().__init__(name, price, 0)
+
+    def set_quantity(self, quantity: int) -> None:
+        """Keep the quantity at zero because this product is not stocked."""
+        self.quantity = 0
+
+    def show(self) -> None:
+        print(f"{self.name}, Price: {self.price}, Quantity: Unlimited")
+
+    def buy(self, quantity: int) -> float:
+        """Buy this product without changing its quantity."""
+        self._validate_purchase_quantity(quantity)
+        return quantity * self.price
+
+
+class LimitedProduct(Product):
+    """Represents a product with a per-order purchase limit."""
+
+    def __init__(
+        self,
+        name: str,
+        price: float,
+        quantity: int,
+        maximum: int,
+    ) -> None:
+        if not isinstance(maximum, int) or maximum <= 0:
+            raise ValueError("Maximum must be a positive whole number")
+
+        super().__init__(name, price, quantity)
+        self.maximum = maximum
+
+    def show(self) -> None:
+        print(
+            f"{self.name}, Price: {self.price}, Quantity: {self.quantity}, "
+            f"Limited to {self.maximum} per order"
+        )
+
+    def buy(self, quantity: int) -> float:
+        """Buy no more than the allowed quantity per order."""
+        self._validate_purchase_quantity(quantity)
+
+        if quantity > self.maximum:
+            raise ValueError(
+                f"Cannot buy more than {self.maximum} per order"
+            )
+
+        return super().buy(quantity)
